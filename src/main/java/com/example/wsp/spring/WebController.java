@@ -1,7 +1,9 @@
 package com.example.wsp.spring;
 
+import com.example.wsp.spring.model.Authn;
 import com.example.wsp.spring.model.RetrospectService;
 import com.example.wsp.spring.model.SignService;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +14,7 @@ import java.time.LocalDateTime;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import javax.servlet.http.HttpSession;
 
 @Controller
 public class WebController {
@@ -59,6 +62,8 @@ public String test(Model model){
         var authn = service2.doSignIn(userId,passphrase);
         if(authn) {
             model.addAttribute("userId",userId);
+            System.out.println("利用中のブラウザ識別番号:"+ httpSession.getId());
+            httpSession.setAttribute("userId",userId);
             return "signed";
         }
         else{
@@ -66,6 +71,37 @@ public String test(Model model){
         }
     }
 
+    @GetMapping("Profile")
+    public String profile(Model model){
+        System.out.println("利用中のブラウザ識別番号:"+ httpSession.getId());
+        var userId = (String) httpSession.getAttribute("userId");
+        model.addAttribute("userId",userId);
+        Authn authn = service2.doprofile(userId);
+        var user_name = authn.getUserName();
+        var user_role = authn.getUserRole();
+        model.addAttribute("userName",user_name);
+        model.addAttribute("userRole",user_role);
+        return "profile";
+    }
+
+
+
+    @GetMapping("Signed")
+    public String signed(Model model){
+        System.out.println("利用中のブラウザ識別番号:"+ httpSession.getId());
+        var userId = (String)httpSession.getAttribute("userId");
+        model.addAttribute("userId",userId);
+        return "signed";
+    }
+
+    @Autowired
+    private HttpSession httpSession;
+
+    @GetMapping("SignOut")
+    public String signout(Model model){
+        httpSession.invalidate();
+        return "signin";
+    }
 
 
 

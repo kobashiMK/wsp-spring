@@ -12,12 +12,19 @@ public class SignService {
     public boolean doSignIn(String userId,String passphrase){
         var Authn = authnRepository.select(userId);
         try {
-            if (Authn.getPassphrase().equals(passphrase)) {
-                return true;
-            }
+                if (Authn==null) {
+                    return false;
+                }
+                else {
+                    return Authn.getPassphrase().equals(passphrase);
+                }
         }catch (DataAccessException e){
-            e.printStackTrace();
+
         }
             return false;
+    }
+    public Authn doprofile(String userId){
+        var Authn = authnRepository.select(userId);
+        return Authn;
     }
 }
